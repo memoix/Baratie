@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reservations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cormorant+SC:wght@300;400&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset & base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:        #1a1a1a;
+      --ink-light:  #4a4a4a;
+      --ink-faint:  #9a9a9a;
+      --rule:       #c8c0b0;
+      --paper:      #f7f4ef;
+      --paper-dark: #ede9e1;
+      --accent:     #2c2c2c;
+      --error:      #8b2020;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    /* ── Closed state ── */
+    #closed {
+      display: none;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 1.5rem;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    #closed img {
+      max-width: 420px;
+      width: 100%;
+      opacity: 0.92;
+    }
+
+    #closed p {
+      font-size: 1rem;
+      font-style: italic;
+      color: var(--ink-faint);
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Main layout ── */
+    #app {
+      display: none;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 4rem 2rem 6rem;
+    }
+
+    /* ── Header ── */
+    .ledger-header {
+      text-align: center;
+      border-bottom: 2px solid var(--ink);
+      padding-bottom: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .ledger-header .establishment {
+      font-family: 'Cormorant SC', serif;
+      font-size: 0.7rem;
+      font-weight: 300;
+      letter-spacing: 0.25em;
+      color: var(--ink-light);
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+
+    .ledger-header h1 {
+      font-family: 'Cormorant SC', serif;
+      font-size: 2.2rem;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      line-height: 1.2;
+    }
+
+    .ledger-header .subtitle {
+      font-size: 0.85rem;
+      font-style: italic;
+      color: var(--ink-faint);
+      margin-top: 0.4rem;
+      letter-spacing: 0.08em;
+    }
+
+    /* ── Section titles ── */
+    .section-rule {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .section-rule::before,
+    .section-rule::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--rule);
+    }
+
+    .section-rule span {
+      font-family: 'Cormorant SC', serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      color: var(--ink-light);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    /* ── Submission form ── */
+    .submission-section {
+      margin-bottom: 4rem;
+      padding: 2rem 2.5rem;
+      border: 1px solid var(--rule);
+      background: var(--paper-dark);
+    }
+
+    .submission-section.submitted {
+      text-align: center;
+      padding: 2.5rem;
+    }
+
+    .submission-section.submitted p {
+      font-style: italic;
+      color: var(--ink-light);
+      font-size: 1.05rem;
+    }
+
+    .form-meta {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.25rem 2rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .form-meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .form-meta-item label {
+      font-family: 'Cormorant SC', serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.18em;
+      color: var(--ink-faint);
+      text-transform: uppercase;
+    }
+
+    .form-meta-item span {
+      font-size: 0.95rem;
+      color: var(--ink-light);
+      font-style: italic;
+    }
+
+    .form-fields {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .field label {
+      font-family: 'Cormorant SC', serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.18em;
+      color: var(--ink-light);
+      text-transform: uppercase;
+    }
+
+    .field input,
+    .field textarea {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--rule);
+      padding: 0.3rem 0;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1rem;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.2s;
+      width: 100%;
+      resize: none;
+    }
+
+    .field input:focus,
+    .field textarea:focus {
+      border-bottom-color: var(--ink);
+    }
+
+    .field textarea {
+      rows: 2;
+      min-height: 2.4rem;
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .form-error {
+      font-size: 0.85rem;
+      color: var(--error);
+      font-style: italic;
+      flex: 1;
+    }
+
+    button[type="submit"] {
+      background: var(--ink);
+      color: var(--paper);
+      border: none;
+      padding: 0.6rem 2rem;
+      font-family: 'Cormorant SC', serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button[type="submit"]:hover { background: var(--ink-light); }
+    button[type="submit"]:disabled { background: var(--rule); cursor: not-allowed; }
+
+    /* ── Ledger table ── */
+    .ledger-section {}
+
+    .ledger-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    .ledger-table thead tr {
+      border-top: 2px solid var(--ink);
+      border-bottom: 1px solid var(--ink);
+    }
+
+    .ledger-table th {
+      font-family: 'Cormorant SC', serif;
+      font-size: 0.58rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink-light);
+      font-weight: 400;
+      padding: 0.6rem 0.75rem;
+      text-align: left;
+    }
+
+    .ledger-table tbody tr {
+      border-bottom: 1px solid var(--rule);
+      transition: background 0.15s;
+    }
+
+    .ledger-table tbody tr:hover {
+      background: var(--paper-dark);
+    }
+
+    .ledger-table td {
+      padding: 0.7rem 0.75rem;
+      color: var(--ink);
+      vertical-align: top;
+    }
+
+    .ledger-table td.date {
+      font-size: 0.8rem;
+      color: var(--ink-faint);
+      white-space: nowrap;
+      font-style: italic;
+    }
+
+    .ledger-table td.name {
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .ledger-table td.numeric {
+      text-align: center;
+      color: var(--ink-light);
+    }
+
+    .ledger-table td.time {
+      white-space: nowrap;
+      color: var(--ink-light);
+      font-size: 0.85rem;
+    }
+
+    .ledger-table td.comment {
+      font-style: italic;
+      color: var(--ink-light);
+      font-size: 0.88rem;
+    }
+
+    .ledger-table tfoot tr {
+      border-top: 2px solid var(--ink);
+    }
+
+    .ledger-table tfoot td {
+      padding: 0.5rem 0.75rem;
+      font-family: 'Cormorant SC', serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      color: var(--ink-faint);
+      text-transform: uppercase;
+    }
+
+    .empty-ledger {
+      text-align: center;
+      padding: 3rem 1rem;
+      font-style: italic;
+      color: var(--ink-faint);
+      font-size: 0.95rem;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    /* ── Loading ── */
+    #loading {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Cormorant SC', serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.25em;
+      color: var(--ink-faint);
+      text-transform: uppercase;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      #app { padding: 2rem 1rem 4rem; }
+      .form-meta { grid-template-columns: repeat(2, 1fr); }
+      .form-fields { grid-template-columns: 1fr; }
+      .ledger-table th:nth-child(4),
+      .ledger-table td:nth-child(4) { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="loading">Verifying&hellip;</div>
+
+  <!-- Shown for invalid or missing token -->
+  <div id="closed">
+    <!-- Replace with your custom closed sign image -->
+    <img src="closed.png" alt="Closed" onerror="this.style.display='none'" />
+    <p>Memoix is not accepting reservations.</p>
+  </div>
+
+  <!-- Shown for valid token -->
+  <div id="app">
+    <header class="ledger-header">
+      <p class="establishment">Est. &mdash; The Kitchen</p>
+      <h1>Reservations</h1>
+      <p class="subtitle">A record of those who found their way here</p>
+    </header>
+
+    <!-- Submission form -->
+    <section class="submission-section" id="submission-section">
+      <div class="section-rule" style="margin-bottom:1.5rem">
+        <span>Your Entry</span>
+      </div>
+
+      <div class="form-meta" id="form-meta">
+        <!-- populated by JS -->
+      </div>
+
+      <form id="reservation-form" autocomplete="off">
+        <div class="form-fields">
+          <div class="field">
+            <label for="input-name">Name</label>
+            <input type="text" id="input-name" maxlength="60" placeholder="As you wish to be remembered" required />
+          </div>
+          <div class="field">
+            <label for="input-comment">Remark <span style="font-size:0.7em;opacity:0.6">(optional)</span></label>
+            <textarea id="input-comment" maxlength="200" rows="2" placeholder="Leave a note, if you like"></textarea>
+          </div>
+        </div>
+        <div class="form-actions">
+          <span class="form-error" id="form-error"></span>
+          <button type="submit" id="submit-btn">Sign the Book</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Ledger -->
+    <section class="ledger-section">
+      <div class="section-rule">
+        <span>The Ledger</span>
+      </div>
+      <div id="ledger-container">
+        <!-- populated by JS -->
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // ── Configuration ──────────────────────────────────────────────
+    const SUPABASE_PROJECT_URL = "https://nbvtbfnhimishmdhczbu.supabase.co";
+    const SUPABASE_ANON_KEY    = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5idnRiZm5oaW1pc2htZGhjemJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3NTY5NDYsImV4cCI6MjA4ODMzMjk0Nn0.3KrhM5VLyqdVgquJw7J5-wWrI-Mau7ZmE21CDyFEdIQ";
+    const FUNCTION_URL = `${SUPABASE_PROJECT_URL}/functions/v1/validate-completion`;
+
+    // ── State ──────────────────────────────────────────────────────
+    let currentBlob = null;
+    let hasSubmitted = false;
+
+    // ── Utilities ──────────────────────────────────────────────────
+    function show(id) { document.getElementById(id).style.display = "flex"; }
+    function hide(id) { document.getElementById(id).style.display = "none"; }
+
+    function formatDate(iso) {
+      const d = new Date(iso);
+      return d.toLocaleDateString("en-CA", {
+        year: "numeric", month: "short", day: "numeric"
+      });
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    async function callFunction(body) {
+      const res = await fetch(FUNCTION_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify(body),
+      });
+      return { status: res.status, data: await res.json() };
+    }
+
+    // ── Render ledger ──────────────────────────────────────────────
+    function renderLedger(records) {
+      const container = document.getElementById("ledger-container");
+
+      if (!records || records.length === 0) {
+        container.innerHTML = `<p class="empty-ledger">No entries yet. Be the first.</p>`;
+        return;
+      }
+
+      const rows = records.map(r => `
+        <tr>
+          <td class="date">${escapeHtml(formatDate(r.completed_at))}</td>
+          <td class="name">${escapeHtml(r.name)}</td>
+          <td class="numeric">${escapeHtml(r.party_size)}</td>
+          <td class="numeric">${escapeHtml(r.table_number)}</td>
+          <td class="time">${escapeHtml(r.time_taken)}</td>
+          <td class="comment">${escapeHtml(r.comment ?? "")}</td>
+        </tr>
+      `).join("");
+
+      container.innerHTML = `
+        <table class="ledger-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Name</th>
+              <th style="text-align:center">Party</th>
+              <th style="text-align:center">Table</th>
+              <th>Time</th>
+              <th>Remark</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+          <tfoot>
+            <tr>
+              <td colspan="6">${records.length} ${records.length === 1 ? "entry" : "entries"}</td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+    }
+
+    // ── Render form meta (read-only puzzle fields) ─────────────────
+    function renderFormMeta(payload) {
+      const items = [
+        { label: "Party Size", value: payload.party ?? "—" },
+        { label: "Table",      value: payload.table ?? "—" },
+        { label: "Time",       value: payload.time  ?? "—" },
+      ];
+      document.getElementById("form-meta").innerHTML = items.map(i => `
+        <div class="form-meta-item">
+          <label>${escapeHtml(i.label)}</label>
+          <span>${escapeHtml(i.value)}</span>
+        </div>
+      `).join("");
+    }
+
+    // ── Form submission ────────────────────────────────────────────
+    document.getElementById("reservation-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (hasSubmitted) return;
+
+      const name    = document.getElementById("input-name").value.trim();
+      const comment = document.getElementById("input-comment").value.trim();
+      const errEl   = document.getElementById("form-error");
+      const btn     = document.getElementById("submit-btn");
+
+      if (!name) { errEl.textContent = "A name is required."; return; }
+
+      errEl.textContent = "";
+      btn.disabled = true;
+      btn.textContent = "Signing…";
+
+      const { status, data } = await callFunction({
+        action: "submit",
+        blob: currentBlob,
+        name,
+        comment,
+      });
+
+      if (status === 200 && data.success) {
+        hasSubmitted = true;
+        const section = document.getElementById("submission-section");
+        section.className = "submission-section submitted";
+        section.innerHTML = `<p>Your name has been added to the book.</p>`;
+        renderLedger(data.records);
+      } else {
+        errEl.textContent = "Something went wrong. Your entry was not recorded.";
+        btn.disabled = false;
+        btn.textContent = "Sign the Book";
+      }
+    });
+
+    // ── Init ───────────────────────────────────────────────────────
+    async function init() {
+      const params = new URLSearchParams(window.location.search);
+      const blob   = params.get("r");
+
+      if (!blob) {
+        hide("loading");
+        document.getElementById("closed").style.display = "flex";
+        return;
+      }
+
+      const { status, data } = await callFunction({ action: "validate", blob });
+
+      hide("loading");
+
+      if (status !== 200 || !data.valid) {
+        document.getElementById("closed").style.display = "flex";
+        return;
+      }
+
+      currentBlob = blob;
+      renderFormMeta(data.payload);
+      renderLedger(data.records);
+      document.getElementById("app").style.display = "block";
+    }
+
+    init();
+  </script>
+</body>
+</html>
