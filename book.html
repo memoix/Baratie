@@ -25,7 +25,7 @@
       background: var(--paper);
       color: var(--ink-light);
       font-family: 'Cormorant Garamond', Georgia, serif;
-      font-size: 16px;
+      font-size: 18px;
       line-height: 1.6;
     }
 
@@ -157,6 +157,7 @@
       grid-template-columns: 1fr 2fr;
       gap: 1.25rem;
       margin-bottom: 1.5rem;
+      align-items: start;
     }
 
     .field { display: flex; flex-direction: column; gap: 0.35rem; }
@@ -325,7 +326,7 @@
 
   <div id="app">
     <header class="ledger-header">
-      <p class="establishment">Est. &mdash; The Kitchen</p>
+      <p class="establishment">Est. &mdash; 2025</p>
       <h1>Reservations</h1>
       <p class="subtitle">A record of those who found their way here</p>
     </header>
@@ -342,7 +343,7 @@
           </div>
           <div class="field">
             <label for="input-comment">
-              Remark <span style="font-size:0.7em;opacity:0.5">(optional)</span>
+              Remarks <span style="font-size:0.7em;opacity:0.5">(optional)</span>
             </label>
             <textarea id="input-comment" maxlength="200" rows="2"
               placeholder="Leave a note, if you like"></textarea>
@@ -404,7 +405,7 @@
               <th>Date</th><th>Name</th>
               <th style="text-align:center">Party</th>
               <th style="text-align:center">Table</th>
-              <th>Time</th><th>Remark</th>
+              <th>Time</th><th>Remarks</th>
             </tr>
           </thead>
           <tbody>${rows}</tbody>
@@ -476,7 +477,7 @@
       });
       return { status: res.status, data: await res.json() };
     }
-    
+
     async function init() {
       const params = new URLSearchParams(window.location.search);
       const blob   = params.get("r");
