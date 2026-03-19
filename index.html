@@ -62,7 +62,6 @@
 
   <script>
     const SUPABASE_PROJECT_URL = "https://nbvtbfnhimishmdhczbu.supabase.co";
-    const SUPABASE_ANON_KEY    = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5idnRiZm5oaW1pc2htZGhjemJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3NTY5NDYsImV4cCI6MjA4ODMzMjk0Nn0.3KrhM5VLyqdVgquJw7J5-wWrI-Mau7ZmE21CDyFEdIQ";
     const FUNCTION_URL = `${SUPABASE_PROJECT_URL}/functions/v1/validate-completion`;
 
     async function init() {
@@ -75,15 +74,6 @@
       }
 
       try {
-        const res = await fetch(FUNCTION_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-          },
-          body: JSON.stringify({ action: "validate", blob }),
-        });
-
         if (res.status === 200) {
           // valid — redirect to ledger, preserve blob
           window.location.replace(`book.html?r=${encodeURIComponent(blob)}`);
