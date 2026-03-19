@@ -463,7 +463,20 @@
           btn.textContent = "Sign the Book";
         }
       });
-
+      
+    async function callFunction(body) {
+      const res = await fetch(FUNCTION_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+          "apikey": SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify(body),
+      });
+      return { status: res.status, data: await res.json() };
+    }
+    
     async function init() {
       const params = new URLSearchParams(window.location.search);
       const blob   = params.get("r");
