@@ -75,13 +75,24 @@
       }
 
       try {
+        const res = await fetch(FUNCTION_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ action: "validate", blob }),
+        });
+
+        console.log("Status:", res.status);
+        const data = await res.json();
+        console.log("Data:", JSON.stringify(data));
+
         if (res.status === 200) {
-          // valid — redirect to ledger, preserve blob
           window.location.replace(`book.html?r=${encodeURIComponent(blob)}`);
           return;
         }
-      } catch (_) {
-        // network error — fall through to closed
+      } catch (e) {
+        console.log("Error:", e);
       }
 
       showClosed();
